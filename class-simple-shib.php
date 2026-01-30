@@ -29,6 +29,7 @@ class Simple_Shib {
 	 */
 	private static $instance;
 
+
 	/**
 	 * Options
 	 *
@@ -36,6 +37,7 @@ class Simple_Shib {
 	 * @var array $options
 	 */
 	private $options;
+
 
 	/**
 	 * Array containing the default options.
@@ -148,6 +150,7 @@ class Simple_Shib {
 		return $options;
 	}
 
+
 	/**
 	 * WP-CLI check
 	 */
@@ -157,6 +160,7 @@ class Simple_Shib {
 		}
 		return false;
 	}
+
 
 	/**
 	 * Add Custom WP-CLI commands.
@@ -172,6 +176,7 @@ class Simple_Shib {
 		// Register the deactivate command.
 		WP_CLI::add_command( 'sshib disable', array( __CLASS__, 'wp_cli_disable' ) );
 	}
+
 
 	/**
 	 * Enable the plugin via WP-CLI.
@@ -191,6 +196,7 @@ class Simple_Shib {
 		WP_CLI::success( 'Simple Shibboleth SSO Enabled' );
 	}
 
+
 	/**
 	 * Disable the plugin via WP-CLI.
 	 */
@@ -208,6 +214,7 @@ class Simple_Shib {
 
 		WP_CLI::success( 'Simple Shibboleth SSO Disabled' );
 	}
+
 
 	/**
 	 * Activates the plugin.
@@ -367,7 +374,7 @@ class Simple_Shib {
 	public function authenticate_or_redirect( $user, $username, $password ) { //phpcs:ignore
 		// Logged in at IdP and WP. Redirect to /.
 		if ( true === is_user_logged_in() &&
-		true === $this->is_shib_session_active() ) {
+			true === $this->is_shib_session_active() ) {
 			$this->debug( 'Logged in at WP and IdP. Redirecting to /.' );
 			wp_safe_redirect( get_site_url() );
 			exit();
@@ -852,7 +859,7 @@ class Simple_Shib {
 	public function add_scripts() {
 		// Make sure the profile screen is being displayed.
 		$screen = get_current_screen();
-		if ( ! $screen || 'profile' !== $screen->id ) {
+		if ( ! $screen || ! in_array( $screen->id, array( 'profile', 'user-edit' ), true ) ) {
 			return;
 		}
 
@@ -868,13 +875,16 @@ class Simple_Shib {
 	public function add_profile_notice() {
 		// Make sure the profile screen is being displayed.
 		$screen = get_current_screen();
-		if ( ! $screen || 'profile' !== $screen->id ) {
+		if ( ! $screen || ! in_array( $screen->id, array( 'profile', 'user-edit' ), true ) ) {
 			return;
 		}
 		?>
-		<div class="notice notice-info"><p><?php esc_html_e( 'Names and email addresses are centrally managed and cannot be changed from within WordPress.', 'simple-shibboleth' ); ?></p></div>
+		<div class="notice notice-info">
+			<p><?php esc_html_e( 'Names and email addresses are centrally managed and cannot be changed from within WordPress.', 'simple-shibboleth' ); ?></p>
+		</div>
 		<?php
 	}
+
 
 	/**
 	 * Disable profile fields POST data.
@@ -935,7 +945,7 @@ class Simple_Shib {
 	private function debug( $msg ) {
 		if ( true === $this->options['debug'] && ! empty( $msg ) ) {
 			// phpcs:disable WordPress.PHP.DevelopmentFunctions.error_log_error_log
-			error_log( 'SimpleShib-Debug: ' . $msg );
+			error_log( 'SimpleShibboleth-Debug: ' . $msg );
 			// phpcs:enable
 		}
 	}

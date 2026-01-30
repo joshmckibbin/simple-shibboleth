@@ -47,8 +47,6 @@ jobs:
         # Copy plugin files, excluding development files
         rsync -av \
             --exclude='.git*' \
-            --exclude='.git/' \
-            --exclude='.github/' \
             --exclude='.vscode' \
             --exclude='.editorconfig' \
             --exclude='assets/' \
@@ -120,7 +118,7 @@ jobs:
           ## Requirements
 
           - WordPress 6.0 or higher
-          - PHP 8.0 or higher
+          - PHP 8.2 or higher
           - Shibboleth SP configured with Apache `mod_shib`
         files: |
           simple-shibboleth-${{ steps.get_version.outputs.VERSION }}.zip
