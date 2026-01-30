@@ -33,4 +33,4 @@ register_deactivation_hook( __FILE__, array( 'Simple_Shib', 'deactivate' ) );
 register_uninstall_hook( __FILE__, array( 'Simple_Shib', 'uninstall' ) );
 
 // Initialize the plugin.
-add_action( 'plugins_loaded', array( 'Simple_Shib', 'init' ) );
+Simple_Shib::get_instance()->init();

@@ -27,7 +27,15 @@ class Simple_Shib {
 	 * @since 1.5.0
 	 * @var Simple_Shib $instance
 	 */
-	private static $instance;
+	private static $instance = null;
+
+
+	/**
+	 * Initialization flag to prevent double initialization.
+	 *
+	 * @var bool
+	 */
+	private $initialized = false;
 
 
 	/**
@@ -51,6 +59,7 @@ class Simple_Shib {
 		'attr_lastname'      => 'sn',
 		'attr_username'      => 'uid',
 		'autoprovision'      => false,
+		'disable_add_user'   => false,
 		'debug'              => false,
 		'enabled'            => false,
 		'pass_change_url'    => 'https://www.example.com/passchange',
@@ -72,7 +81,7 @@ class Simple_Shib {
 	 * @see add_filter()
 	 * @see add_action()
 	 */
-	public function __construct() {
+	private function setup() {
 		// Get the options.
 		$this->options = self::get_options();
 
@@ -94,15 +103,33 @@ class Simple_Shib {
 			// Bypass the logout confirmation and redirect to $session_logout_url defined above.
 			add_action( 'login_form_logout', array( $this, 'shib_logout' ), 5, 0 );
 
-			// Hide password fields on profile.php and user-edit.php, and do not alow resets.
-			add_action( 'admin_init', array( $this, 'admin_init' ) );
+			// 'show_user_profile' fires after the "About Yourself" section when a user is editing their own profile.
+			add_action( 'show_user_profile', array( $this, 'add_password_change_link' ) );
+
+			// Don't just mark the HTML form fields readonly, but handle the POST data as well.
+			add_action( 'personal_options_update', array( $this, 'disable_profile_fields_post' ) );
+			
+			// Add scripts to disable form fields.
+			add_action( 'admin_enqueue_scripts', array( $this, 'add_scripts' ) );
+
+			// Add a notice to the top of the profile page.
+			//add_action( 'admin_notices', array( $this, 'add_profile_notice' ), 10 );
+			add_action( 'current_screen', array( $this, 'add_profile_notice' ), 10 );
 
 			add_filter( 'show_password_fields', '__return_false' );
 			add_filter( 'allow_password_reset', '__return_false' );
 			add_action( 'login_form_lostpassword', array( $this, 'lost_password' ) );
-		}
 
-		add_action( 'wp_before_admin_bar_render', array( $this, 'remove_new_user_admin_bar_link' ) );
+			// Remove add new user option
+			if ( true === $this->options['autoprovision'] && true === $this->options['disable_add_user'] ) {
+				add_action( 'wp_before_admin_bar_render', array( $this, 'remove_new_user_admin_bar_link' ) );
+				add_action( 'admin_menu', array( $this, 'remove_add_user_menu_option' ) );
+				add_action( 'admin_init', array( $this, 'disable_add_user_page' ) );
+				if ( is_multisite() ) {
+					add_action( 'network_admin_menu', array( $this, 'remove_add_user_menu_option' ) );
+				}
+			}
+		}
 
 		// Add the settings menu page and handle POST options.
 		if ( ! is_multisite() ) {
@@ -116,15 +143,32 @@ class Simple_Shib {
 
 
 	/**
-	 * Initialize the Simple_Shib class.
+	 * Get plugin instance (singleton pattern).
 	 *
-	 * @since 1.5.0
+	 * @return Simple_Shib The singleton instance of the Simple_Shib class.
 	 */
-	public static function init() {
-		if ( is_null( self::$instance ) ) {
+	public static function get_instance() {
+		if ( null === self::$instance ) {
 			self::$instance = new self();
 		}
 		return self::$instance;
+	}
+
+
+	/**
+	 * Initializes the plugin by setting up hooks and loading tweaks.
+	 *
+	 * @return void
+	 */
+	public function init() {
+
+		if ( $this->initialized ) {
+			return;
+		}
+
+		$this->initialized = true;
+
+		$this->setup();
 	}
 
 
@@ -259,11 +303,11 @@ class Simple_Shib {
 
 		// Remove all shib filters and actions added by this plugin.
 		remove_all_filters( 'authenticate' );
-		remove_action( 'init', array( self::init(), 'validate_shib_session' ) );
-		remove_action( 'login_form_logout', array( self::init(), 'shib_logout' ) );
-		remove_action( 'admin_menu', array( self::init(), 'add_settings_menu' ) );
-		remove_action( 'network_admin_menu', array( self::init(), 'add_settings_menu' ) );
-		remove_action( 'wp_before_admin_bar_render', array( self::init(), 'remove_new_user_admin_bar_link' ) );
+		remove_action( 'init', array( self::get_instance(), 'validate_shib_session' ) );
+		remove_action( 'login_form_logout', array( self::get_instance(), 'shib_logout' ) );
+		remove_action( 'admin_menu', array( self::get_instance(), 'add_settings_menu' ) );
+		remove_action( 'network_admin_menu', array( self::get_instance(), 'add_settings_menu' ) );
+		remove_action( 'wp_before_admin_bar_render', array( self::get_instance(), 'remove_new_user_admin_bar_link' ) );
 	}
 
 
@@ -318,6 +362,7 @@ class Simple_Shib {
 
 				// Booleans.
 				case 'autoprovision':
+				case 'disable_add_user':
 				case 'debug':
 				case 'enabled':
 					$validated = filter_var( $value, FILTER_VALIDATE_BOOL, FILTER_NULL_ON_FAILURE );
@@ -407,30 +452,6 @@ class Simple_Shib {
 
 
 	/**
-	 * Admin init.
-	 *
-	 * Apply several actions on the user profile edit pages.
-	 *
-	 * @since 1.0.0
-	 *
-	 * @see add_action()
-	 */
-	public function admin_init() {
-		// 'show_user_profile' fires after the "About Yourself" section when a user is editing their own profile.
-		add_action( 'show_user_profile', array( $this, 'add_password_change_link' ) );
-
-		// Add scripts to disable form fields.
-		add_action( 'admin_enqueue_scripts', array( $this, 'add_scripts' ) );
-
-		// Add a notice to the top of the profile page.
-		add_action( 'admin_notices', array( $this, 'add_profile_notice' ) );
-
-		// Don't just mark the HTML form fields readonly, but handle the POST data as well.
-		add_action( 'personal_options_update', array( $this, 'disable_profile_fields_post' ) );
-	}
-
-
-	/**
 	 * Adds a settings menu.
 	 *
 	 * Hooked on admin_menu and network_admin_menu.
@@ -513,11 +534,15 @@ class Simple_Shib {
 					</td>
 				</tr>
 				<tr>
-					<th scope="row"><?php esc_html_e( 'Autoprovision Accounts', 'simple-shibboleth' ); ?></th>
+					<th scope="row"><?php esc_html_e( 'Account Provisioning', 'simple-shibboleth' ); ?></th>
 					<td>
 						<input type="checkbox" id="simple-shibboleth--autoprovision" name="simpleshib_options[autoprovision]" value="1"<?php echo ( true === $this->options['autoprovision'] ? ' checked' : '' ); ?> />
-						<label for="simple-shibboleth--autoprovision"><?php esc_html_e( 'Automatically create local accounts (as needed) after authenticating at the IdP.', 'simple-shibboleth' ); ?></label><br>
+						<label for="simple-shibboleth--autoprovision"><strong><?php esc_html_e( 'Automatically create local accounts (as needed) after authenticating at the IdP', 'simple-shibboleth' ); ?></strong></label><br>
 						<?php esc_html_e( 'If disabled, only users with pre-existing local accounts can login.', 'simple-shibboleth' ); ?>
+						<br><br>
+						<input type="checkbox" id="simple-shibboleth--disable-add-user" name="simpleshib_options[disable_add_user]" value="1"<?php echo ( true === $this->options['disable_add_user'] ? ' checked' : '' ); ?> />
+						<label for="simple-shibboleth--disable-add-user"><strong><?php esc_html_e( 'Disable manual user creation', 'simple-shibboleth' ); ?></strong></label><br>
+						<?php esc_html_e( 'If enabled, adding new users manually via the WordPress admin interface will be disabled.', 'simple-shibboleth' ); ?>
 					</td>
 				</tr>
 				<tr>
@@ -852,14 +877,24 @@ class Simple_Shib {
 
 
 	/**
+	 * Check if current screen is a user editing page
+	 * 
+	 * @return bool True if the current screen is a user editing page, false otherwise.
+	 */
+	private static function is_user_edit_screen() {
+		$screen = get_current_screen();
+		return $screen && in_array( $screen->id, array( 'profile', 'user-edit', 'profile-network', 'user-edit-network' ), true );
+	}
+
+
+	/**
 	 * Add scripts for disabling profile fields.
 	 *
 	 * @since 1.3.0
 	 */
 	public function add_scripts() {
 		// Make sure the profile screen is being displayed.
-		$screen = get_current_screen();
-		if ( ! $screen || ! in_array( $screen->id, array( 'profile', 'user-edit' ), true ) ) {
+		if ( ! self::is_user_edit_screen() ) {
 			return;
 		}
 
@@ -874,8 +909,7 @@ class Simple_Shib {
 	 */
 	public function add_profile_notice() {
 		// Make sure the profile screen is being displayed.
-		$screen = get_current_screen();
-		if ( ! $screen || ! in_array( $screen->id, array( 'profile', 'user-edit' ), true ) ) {
+		if ( ! self::is_user_edit_screen() ) {
 			return;
 		}
 		?>
@@ -883,6 +917,33 @@ class Simple_Shib {
 			<p><?php esc_html_e( 'Names and email addresses are centrally managed and cannot be changed from within WordPress.', 'simple-shibboleth' ); ?></p>
 		</div>
 		<?php
+	}
+
+
+	/**
+	 * Remove "Add New User" menu option if auto-provisioning is enabled
+	 */
+	public function remove_add_user_menu_option() {
+		if ( false === $this->options['disable_add_user'] ) {
+			return;
+		}
+
+		remove_submenu_page( 'users.php', 'user-new.php' );
+	}
+
+
+	/**
+	 * Disable "Add New User" page access.
+	 */
+	public function disable_add_user_page() {
+		if ( false === $this->options['disable_add_user'] ) {
+			return;
+		}
+
+		global $pagenow;
+		if ( $pagenow === 'user-new.php' ) {
+			wp_die( 'Access denied.' );
+		}
 	}
 
 

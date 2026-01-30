@@ -96,6 +96,7 @@ See the `LICENSE` file for full details.
 == Changelog ==
 
 = 1.5.3 =
+* Feature: Option to disable manual user creation when auto-provisioning is enabled.
 * Fix: Disable user editing of name and email fields on user-edit page and add notice stating such.
 * Require PHP 8.2
 * Require WordPress 6.0
