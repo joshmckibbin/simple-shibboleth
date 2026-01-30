@@ -2,9 +2,9 @@
 Contributors: srg-1, joshmckibbin
 Tags: shibboleth, authentication, sso, login
 Requires at least: 5.9
-Tested up to: 6.8
-Requires PHP: 8.0
-Stable tag: 1.5.2
+Tested up to: 6.9
+Requires PHP: 8.2
+Stable tag: 1.5.3
 License: MIT
 
 A modernized fork of SimpleShib for Shibboleth SSO authentication. Easy to install and configure, focusing solely on authentication.
@@ -94,6 +94,11 @@ See the `LICENSE` file for full details.
 2. The second half of the SimpleShib plugin settings within the WordPress admin menu.
 
 == Changelog ==
+
+= 1.5.3 =
+* Fix: Disable user editing of name and email fields on user-edit page and add notice stating such.
+* Require PHP 8.2
+* Require WordPress 6.0
 
 = 1.5.2 =
 * Fix: streamline release package creation and update documentation for clarity.
