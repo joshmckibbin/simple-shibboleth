@@ -655,7 +655,7 @@ class Simple_Shib {
 	private function is_shib_session_active() {
 		if ( isset( $_SERVER['AUTH_TYPE'] ) && 'shibboleth' === $_SERVER['AUTH_TYPE']
 			&& ! empty( $_SERVER['Shib-Session-ID'] )
-			&& ! empty( $_SERVER[ $this->options['attr_email'] ] )
+			// && ! empty( $_SERVER[ $this->options['attr_email'] ] )
 			&& ! empty( $_SERVER[ $this->options['attr_firstname'] ] )
 			&& ! empty( $_SERVER[ $this->options['attr_lastname'] ] )
 			&& ! empty( $_SERVER[ $this->options['attr_username'] ] )
@@ -741,10 +741,12 @@ class Simple_Shib {
 	private function login_to_wordpress() {
 		// The headers have been confirmed to be ! empty() in is_shib_session_active() above.
 		// phpcs:disable -- The data is coming from the IdP, not the user, so it is trustworthy.
-		$shib['email']       = $_SERVER[ $this->options['attr_email'] ];
-		$shib['firstName']   = $_SERVER[ $this->options['attr_firstname'] ];
-		$shib['lastName']    = $_SERVER[ $this->options['attr_lastname'] ];
-		$shib['username']    = $_SERVER[ $this->options['attr_username'] ];
+		$shib = array(
+			'email' => !empty( $_SERVER[ $this->options['attr_email'] ] ) ? $_SERVER[ $this->options['attr_email'] ] : null,
+			'firstName' => $_SERVER[ $this->options['attr_firstname'] ],
+			'lastName' => $_SERVER[ $this->options['attr_lastname'] ],
+			'username' => $_SERVER[ $this->options['attr_username'] ],
+		);
 		// phpcs:enable
 
 		// Check to see if they exist locally.
@@ -764,7 +766,6 @@ class Simple_Shib {
 			'user_pass'     => sha1( microtime() ),
 			'user_login'    => $shib['username'],
 			'user_nicename' => $shib['username'],
-			'user_email'    => $shib['email'],
 			'display_name'  => $shib['firstName'] . ' ' . $shib['lastName'],
 			'nickname'      => $shib['username'],
 			'first_name'    => $shib['firstName'],
@@ -776,8 +777,14 @@ class Simple_Shib {
 		if ( false !== $user_obj && is_numeric( $user_obj->ID ) ) {
 			$insert_user_data['ID'] = $user_obj->ID;
 			$error_msg              = 'syncing';
+			if ( $shib['email'] ) {
+				$insert_user_data['user_email'] = $shib['email'];
+			}
+			$insert_user_data['user_registered'] = $user_obj->user_registered;
 		} else {
 			$error_msg = 'creating';
+			$insert_user_data['user_email'] = $shib['email'] ?? '';
+			$insert_user_data['user_registered'] = current_time( 'Y-m-d H:i:s' );
 		}
 
 		$new_user = wp_insert_user( $insert_user_data );
