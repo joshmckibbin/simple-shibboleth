@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Simple Shibboleth
  * Description: User authentication via Shibboleth Single Sign-On.
- * Version: 1.5.3
+ * Version: 1.5.4
  * Requires at least: 6.0
  * Requires PHP: 8.2
  * Author: Steve Guglielmo, Josh Mckibbin
@@ -19,7 +19,7 @@
 defined( 'ABSPATH' ) || exit;
 
 // Define the plugin version.
-define( 'SIMPLE_SHIBBOLETH_VERSION', '1.5.3' );
+define( 'SIMPLE_SHIBBOLETH_VERSION', '1.5.4' );
 
 require_once 'class-simple-shib.php';
 

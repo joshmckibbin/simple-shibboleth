@@ -4,7 +4,7 @@ Tags: shibboleth, authentication, sso, login
 Requires at least: 5.9
 Tested up to: 6.9
 Requires PHP: 8.2
-Stable tag: 1.5.3
+Stable tag: 1.5.4
 License: MIT
 
 A modernized fork of SimpleShib for Shibboleth SSO authentication. Easy to install and configure, focusing solely on authentication.
@@ -94,6 +94,11 @@ See the `LICENSE` file for full details.
 2. The second half of the SimpleShib plugin settings within the WordPress admin menu.
 
 == Changelog ==
+
+= 1.5.4 =
+* Feature: Add user_registered field when auto-provisioning users.
+* Fix: Remove non-empty SAML `email` attribute as a verification check for authenticated session
+* Fix: Make `email` optional for provisioning accounts
 
 = 1.5.3 =
 * Feature: Option to disable manual user creation when auto-provisioning is enabled.
