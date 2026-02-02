@@ -459,14 +459,8 @@ class Simple_Shib {
 	 * @see add_submenu_page()
 	 */
 	public function add_settings_menu() {
-		if ( ! is_multisite() ) {
-			$parent_slug = 'options-general.php'; // Single site admin page.
-		} else {
-			$parent_slug = 'settings.php'; // Network admin page.
-		}
-
 		add_submenu_page(
-			$parent_slug,
+			is_multisite() ? 'settings.php' : 'options-general.php',
 			__( 'Simple Shibboleth Settings', 'simple-shibboleth' ),
 			__( 'Simple Shibboleth', 'simple-shibboleth' ),
 			'manage_options',
