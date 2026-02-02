@@ -113,7 +113,6 @@ class Simple_Shib {
 			add_action( 'admin_enqueue_scripts', array( $this, 'add_scripts' ) );
 
 			// Add a notice to the top of the profile page.
-			//add_action( 'admin_notices', array( $this, 'add_profile_notice' ), 10 );
 			add_action( 'current_screen', array( $this, 'add_profile_notice' ), 10 );
 
 			add_filter( 'show_password_fields', '__return_false' );
@@ -132,12 +131,12 @@ class Simple_Shib {
 		}
 
 		// Add the settings menu page and handle POST options.
-		if ( ! is_multisite() ) {
-			add_action( 'admin_menu', array( $this, 'add_settings_menu' ), 10, 0 );
-			add_action( 'admin_post_simpleshib_settings', array( $this, 'handle_post' ), 5, 0 );
-		} else {
+		if ( is_multisite() ) {
 			add_action( 'network_admin_menu', array( $this, 'add_settings_menu' ), 10, 0 );
 			add_action( 'network_admin_edit_simpleshib_settings', array( $this, 'handle_post' ), 5, 0 );
+		} else {
+			add_action( 'admin_menu', array( $this, 'add_settings_menu' ), 10, 0 );
+			add_action( 'admin_post_simpleshib_settings', array( $this, 'handle_post' ), 5, 0 );
 		}
 	}
 
@@ -774,17 +773,17 @@ class Simple_Shib {
 
 		// If wp_insert_user() receives 'ID' in the array, it will update the
 		// user data of an existing account instead of creating a new account.
-		if ( false !== $user_obj && is_numeric( $user_obj->ID ) ) {
-			$insert_user_data['ID'] = $user_obj->ID;
-			$error_msg              = 'syncing';
+		if ( ! empty( $user_obj ) ) {
+			$error_msg                           = 'syncing';
+			$insert_user_data['ID']              = (int) $user_obj->ID;
+			$insert_user_data['user_registered'] = $user_obj->user_registered;
 			if ( $shib['email'] ) {
 				$insert_user_data['user_email'] = $shib['email'];
 			}
-			$insert_user_data['user_registered'] = $user_obj->user_registered;
 		} else {
 			$error_msg = 'creating';
 			$insert_user_data['user_email'] = $shib['email'] ?? '';
-			$insert_user_data['user_registered'] = current_time( 'Y-m-d H:i:s' );
+			//$insert_user_data['user_registered'] = current_time( 'Y-m-d H:i:s' );
 		}
 
 		$new_user = wp_insert_user( $insert_user_data );
