@@ -1,8 +1,6 @@
-const userEditForm = document.getElementById('your-profile');
-
-if ( userEditForm ) {
-    userEditForm.querySelector('#first_name').readOnly = true;
-    userEditForm.querySelector('#last_name').readOnly = true;
-    userEditForm.querySelector('#nickname').readOnly = true;
-    userEditForm.querySelector('#email').readOnly = true;
+if ( document.getElementById('your-profile') ) {
+    document.getElementById('first_name').readOnly = true;
+    document.getElementById('last_name').readOnly = true;
+    document.getElementById('nickname').readOnly = true;
+    document.getElementById('email').readOnly = true;
 }

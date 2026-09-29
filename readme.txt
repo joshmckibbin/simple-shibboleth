@@ -1,10 +1,10 @@
 === Simple Shibboleth ===
 Contributors: srg-1, joshmckibbin
 Tags: shibboleth, authentication, sso, login
-Requires at least: 5.9
+Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 8.2
-Stable tag: 1.5.4
+Stable tag: 1.5.5
 License: MIT
 
 A modernized fork of SimpleShib for Shibboleth SSO authentication. Easy to install and configure, focusing solely on authentication.

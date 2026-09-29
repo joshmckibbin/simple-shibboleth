@@ -1,0 +1,14 @@
+{
+    "name": "joshmckibbin/simple-shibboleth",
+    "description": "A simple WordPress plugin that enables Single Sign-On with Shibboleth",
+    "type": "project",
+    "authors": [
+        {
+            "name": "Josh Mckibbin",
+            "email": "joshmckibbin@gmail.com"
+        }
+    ],
+    "require": {
+        "yahnis-elsts/plugin-update-checker": "^5.7"
+    }
+}

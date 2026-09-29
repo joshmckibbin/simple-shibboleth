@@ -6,4 +6,7 @@
 .vscode export-ignore
 .editorconfig export-ignore
 *.md export-ignore
+vendor export-ignore
+composer.json export-ignore
+phpcs.xml export-ignore
 README.md export-ignore

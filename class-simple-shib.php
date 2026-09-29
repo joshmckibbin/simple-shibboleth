@@ -51,7 +51,7 @@ class Simple_Shib {
 	 * Array containing the default options.
 	 *
 	 * @since 1.2.0
-	 * @var const array DEFAULT_OPTS
+	 * @var array DEFAULT_OPTS
 	 */
 	private const DEFAULT_OPTS = array(
 		'attr_email'         => 'mail',
@@ -108,7 +108,7 @@ class Simple_Shib {
 
 			// Don't just mark the HTML form fields readonly, but handle the POST data as well.
 			add_action( 'personal_options_update', array( $this, 'disable_profile_fields_post' ) );
-			
+
 			// Add scripts to disable form fields.
 			add_action( 'admin_enqueue_scripts', array( $this, 'add_scripts' ) );
 
@@ -229,14 +229,18 @@ class Simple_Shib {
 			return;
 		}
 
+		if ( ! class_exists( '\\WP_CLI' ) ) {
+			return;
+		}
+
 		$options = self::get_options();
 		if ( true === $options['enabled'] ) {
-			WP_CLI::error( 'Simple Shibboleth SSO is already enabled.' );
+			\WP_CLI::error( 'Simple Shibboleth SSO is already enabled.' );
 		}
 		$options['enabled'] = true;
 		update_site_option( 'simpleshib_options', $options );
 
-		WP_CLI::success( 'Simple Shibboleth SSO Enabled' );
+		\WP_CLI::success( 'Simple Shibboleth SSO Enabled' );
 	}
 
 
@@ -248,14 +252,18 @@ class Simple_Shib {
 			return;
 		}
 
+		if ( ! class_exists( '\\WP_CLI' ) ) {
+			return;
+		}
+
 		$options = self::get_options();
 		if ( false === $options['enabled'] ) {
-			WP_CLI::error( 'Simple Shibboleth SSO is already disabled.' );
+			\WP_CLI::error( 'Simple Shibboleth SSO is already disabled.' );
 		}
 		$options['enabled'] = false;
 		update_site_option( 'simpleshib_options', $options );
 
-		WP_CLI::success( 'Simple Shibboleth SSO Disabled' );
+		\WP_CLI::success( 'Simple Shibboleth SSO Disabled' );
 	}
 
 
@@ -775,9 +783,8 @@ class Simple_Shib {
 				$insert_user_data['user_email'] = $shib['email'];
 			}
 		} else {
-			$error_msg = 'creating';
+			$error_msg                      = 'creating';
 			$insert_user_data['user_email'] = $shib['email'] ?? '';
-			//$insert_user_data['user_registered'] = current_time( 'Y-m-d H:i:s' );
 		}
 
 		$new_user = wp_insert_user( $insert_user_data );
@@ -878,7 +885,7 @@ class Simple_Shib {
 
 	/**
 	 * Check if current screen is a user editing page
-	 * 
+	 *
 	 * @return bool True if the current screen is a user editing page, false otherwise.
 	 */
 	private static function is_user_edit_screen() {
@@ -941,7 +948,7 @@ class Simple_Shib {
 		}
 
 		global $pagenow;
-		if ( $pagenow === 'user-new.php' ) {
+		if ( 'user-new.php' === $pagenow ) {
 			wp_die( 'Access denied.' );
 		}
 	}
