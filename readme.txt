@@ -2,7 +2,7 @@
 Contributors: srg-1, joshmckibbin
 Tags: shibboleth, authentication, sso, login
 Requires at least: 6.0
-Tested up to: 6.9
+Tested up to: 7.1
 Requires PHP: 8.2
 Stable tag: 1.5.5
 License: MIT
