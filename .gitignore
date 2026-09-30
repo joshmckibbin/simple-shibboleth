@@ -2,3 +2,4 @@
 .editorconfig
 vendor/
 node_modules/
+build/
