@@ -1,0 +1,14 @@
+# Files and folders excluded from the release zip.
+.distignore
+.git*
+.vscode
+.DS_Store
+assets
+composer.json
+composer.lock
+node_modules
+package.json
+package-lock.json
+phpcs.xml
+*.sh
+*.zip
