@@ -95,6 +95,15 @@ See the `LICENSE` file for full details.
 
 == Changelog ==
 
+= 1.5.5 =
+* Feature: Automatic updates from GitHub releases via the Plugin Update Checker library.
+* Feature: Add Composer support.
+* Fix: Settings menu and settings form handling on multisite.
+* Fix: Preserve the original `user_registered` date when syncing existing users.
+* Fix: Guard WP-CLI commands when WP-CLI is not loaded.
+* Code quality: Add PHPCS ruleset and apply WordPress coding standards.
+* Build: Reworked release workflow, added `.distignore` and `dist.sh` for local packaging.
+
 = 1.5.4 =
 * Feature: Add user_registered field when auto-provisioning users.
 * Fix: Remove non-empty SAML `email` attribute as a verification check for authenticated session
