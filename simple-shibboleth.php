@@ -29,7 +29,7 @@ require_once 'class-simple-shib.php';
 
 // Initialize the plugin update checker.
 $sshib_update_checker = PucFactory::buildUpdateChecker(
-	'https://github.com/your-repo/simple-shibboleth/',
+	'https://github.com/joshmckibbin/simple-shibboleth/',
 	__FILE__,
 	'simple-shibboleth'
 );
